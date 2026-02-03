@@ -1,48 +1,22 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function isSignedIn() { return request.auth != null; }
-    function userRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-    }
+// Add to your Firestore rules (adjust paths to your existing rules)
+match /users/{userId} {
+  allow read: if request.auth != null && request.auth.uid == userId;
+  allow write: if request.auth != null && request.auth.uid == userId;
 
-    match /quarries/{quarryId} {
-      // Buyers MUST NOT see quarry locations
-      allow read: if isSignedIn() && userRole() != 'buyer';
-      allow create, update, delete: if isSignedIn() && userRole() == 'admin';
-    }
-
-    match /orders/{orderId} {
-      // Create only by authenticated user as buyer
-      allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
-
-      // Read by buyer (their orders) or staff/admin/assigned quarry/trucker
-      allow read: if isSignedIn() && (resource.data.buyerId == request.auth.uid || userRole() in ['admin','quarry','trucker','agent']);
-
-      // Updates: admin can update anything. Buyers may cancel their order before payment by only changing `status` to 'cancelled'.
-      allow update: if isSignedIn() && (
-        userRole() == 'admin' ||
-        (
-          request.auth.uid == resource.data.buyerId &&
-          request.resource.data.keys().hasOnly(['status']) &&
-          request.resource.data.status == 'cancelled' &&
-          resource.data.status != 'delivered'
-        )
-      );
-
-      // Prevent buyers from writing assignedQuarryId (only admin or server-side services should set it)
-      function assignedQuarryChangeIsAllowed() {
-        return userRole() == 'admin' || (request.auth.uid == resource.data.buyerId && !(request.resource.data.keys().hasAny(['assignedQuarryId'])) == true);
-      }
-
-      // Combine with update rules above - already covers admin and restricted buyer cancellation; ensure assignedQuarryId is not changed by buyer
-    }
-
-    // Simple users collection access for role lookup - users can read their own document
-    match /users/{userId} {
-      allow read: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn() && request.auth.uid == userId; // user can update their profile (but not role)
-      allow create: if isSignedIn();
-    }
+  match /preferences/notifications {
+    allow read, write: if request.auth != null && request.auth.uid == userId;
   }
+
+  match /notifications/{notifId} {
+    allow create: if request.auth != null && request.auth.uid == userId; // server functions may create other users' notifications
+    allow read: if request.auth != null && request.auth.uid == userId;
+    allow update: if request.auth != null && request.auth.uid == userId;
+    allow delete: if request.auth != null && request.auth.uid == userId;
+  }
+}
+
+// Admin notifications collection
+match /admin_notifications/{doc} {
+  allow read: if request.auth != null && request.auth.token.admin == true;
+  allow write: if request.auth != null && request.auth.token.admin == true;
 }
