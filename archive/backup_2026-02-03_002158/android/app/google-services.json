@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "752748936745",
+    "project_id": "aggregates-app",
+    "storage_bucket": "aggregates-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752748936745:android:156181a0e7ad3697e9a638",
+        "android_client_info": {
+          "package_name": "com.example.aggregates_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "752748936745-jdh39ubutvn6spepq1g1s1g0klhdca9t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_9NXRGdQ7-aKrN5_vlaH4JcUG_GBcigQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "752748936745-jdh39ubutvn6spepq1g1s1g0klhdca9t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
